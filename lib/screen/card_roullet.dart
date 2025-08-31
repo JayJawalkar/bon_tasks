@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 import 'dart:math' as math;
 
@@ -27,7 +26,7 @@ class _CardRouletteState extends State<CardRoulette>
   late Animation<Offset> _entrySlideAnimation;
 
   int _currentCardIndex = 0;
-  bool _isSpinning = false;
+  final bool _isSpinning = false;
 
   // Card data - now with proper image asset paths
   final List<CreditCard> cards = [
@@ -171,32 +170,6 @@ class _CardRouletteState extends State<CardRoulette>
     super.dispose();
   }
 
-  Future<void> _spinRoulette() async {
-    if (_isSpinning) return;
-
-    setState(() => _isSpinning = true);
-    HapticFeedback.mediumImpact();
-
-    final random = math.Random();
-    final finalIndex = random.nextInt(cards.length);
-
-    await _rotationController.forward();
-
-    await _pageController.animateToPage(
-      finalIndex,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutCubic,
-    );
-
-    setState(() {
-      _currentCardIndex = finalIndex;
-      _isSpinning = false;
-    });
-
-    _rotationController.reset();
-    HapticFeedback.lightImpact();
-  }
-
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width > 600;
@@ -271,80 +244,6 @@ class CreditCard {
     required this.gradientColors,
     required this.accentColor,
   });
-}
-
-// Header Widget
-class _Header extends StatelessWidget {
-  final Animation<double> entryFadeAnimation;
-  final AnimationController entryController;
-
-  const _Header({
-    required this.entryFadeAnimation,
-    required this.entryController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width > 600;
-
-    return FadeTransition(
-      opacity: entryFadeAnimation,
-      child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, -0.3), end: Offset.zero)
-            .animate(
-              CurvedAnimation(
-                parent: entryController,
-                curve: Curves.easeOutCubic,
-              ),
-            ),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 32 : 24),
-          child: Column(
-            children: [
-              Text(
-                'Card Roulette',
-                style: TextStyle(
-                  fontSize: isTablet ? 25 : 22,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: -1,
-                ),
-              ),
-              SizedBox(height: isTablet ? 12 : 8),
-              Text(
-                'Discover your perfect credit card match',
-                style: TextStyle(
-                  fontSize: isTablet ? 18 : 16,
-                  color: Colors.white.withOpacity(0.7),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Reusable Icon Button
-class _IconButton extends StatelessWidget {
-  final IconData icon;
-
-  const _IconButton({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Icon(icon, color: Colors.white, size: 24),
-    );
-  }
 }
 
 // Card Carousel Widget
